@@ -17,6 +17,7 @@ package com.example.android.common.logger;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.util.*;
 import android.support.v7.widget.AppCompatTextView;
 
@@ -92,7 +93,7 @@ public class LogView extends AppCompatTextView implements LogNode {
 
         // In case this was originally called from an AsyncTask or some other off-UI thread,
         // make sure the update occurs within the UI thread.
-        ((Activity) getContext()).runOnUiThread( (new Thread(new Runnable() {
+        (getActivity()).runOnUiThread( (new Thread(new Runnable() {
             @Override
             public void run() {
                 // Display the text we just generated within the LogView.
@@ -103,6 +104,17 @@ public class LogView extends AppCompatTextView implements LogNode {
         if (mNext != null) {
             mNext.println(priority, tag, msg, tr);
         }
+    }
+
+    private Activity getActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
     }
 
     public LogNode getNext() {
